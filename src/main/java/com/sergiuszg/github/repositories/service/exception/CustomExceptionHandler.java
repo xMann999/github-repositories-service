@@ -17,5 +17,4 @@ public class CustomExceptionHandler {
                         .status(e.getHttpStatus())
                         .build());
     }
-
 }

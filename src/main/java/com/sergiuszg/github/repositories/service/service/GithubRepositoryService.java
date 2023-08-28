@@ -25,20 +25,20 @@ public class GithubRepositoryService {
     private final GithubRepositoryComponentMapper githubRepositoryComponentMapper;
 
     public RepoDetailsDto showUserRepositoriesDetails(String owner) {
-        List<Repo> repos = githubclient.showUserRepositories(owner);
-        if (repos.size() == 0) {
+        List<Repo> repos = githubclient.showUserRepositories(owner).stream()
+                .filter(repo -> !repo.isFork()).toList();
+        if (repos.isEmpty()) {
             throw new NoContentException("User does not have any repository");
         }
-        List<Branch> branches = new ArrayList<>();
 
-        for (Repo repo : repos) {
-            String repoName = repo.getName();
-            List<BranchWithoutRepoName> branchWithoutRepoNames = githubclient.showUserBranches(owner, repoName);
-            List<Branch> branchesWithRepoNames = branchWithoutRepoNames.stream()
-                    .map(branchWithoutRepoName -> githubRepositoryComponentMapper.connectBranchToRepository(branchWithoutRepoName, repoName))
-                    .toList();
-            branches.addAll(branchesWithRepoNames);
-        }
+        List<Branch> branches = repos.parallelStream()
+                .flatMap(repo -> {
+                    String repoName = repo.getName();
+                    List<BranchWithoutRepoName> branchWithoutRepoNames = githubclient.showUserBranches(owner, repoName);
+                    return branchWithoutRepoNames.stream()
+                            .map(branchWithoutRepoName -> githubRepositoryComponentMapper.connectBranchToRepository(branchWithoutRepoName, repoName));
+                })
+                .toList();
         return githubRepositoryMapper.map(branches, repos);
     }
 }

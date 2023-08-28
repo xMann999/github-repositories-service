@@ -27,7 +27,6 @@ public class GithubRepositoryMapper {
                                         .filter(branch -> branch.getRepositoryName().equals(repo.getName()))
                                         .toList()))
                                 .build())
-                        .filter(repoDto -> !repoDto.isFork())
                         .toList())
                 .build();
     }

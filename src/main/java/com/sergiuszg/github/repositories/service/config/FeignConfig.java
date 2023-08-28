@@ -14,7 +14,6 @@ public class FeignConfig {
     @Bean
     public RequestInterceptor requestTokenBearerInterceptor() {
         return requestTemplate -> {
-            requestTemplate.header("Authorization", "Bearer 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");
             requestTemplate.header("Accept", "application/vnd.github+json");
         };
     }
